@@ -96,6 +96,7 @@
   .msg-room-title  { color: var(--gold);   font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
   .msg-room-desc   { color: var(--room);   margin-bottom: 4px; }
   .msg-weather     { color: var(--dim);    font-style: italic; margin-bottom: 4px; }
+  .msg-item        { color: var(--cyan);   margin-bottom: 2px; }
   .msg-exits       { color: var(--green);  margin-bottom: 2px; }
   .msg-exit-detail { color: var(--dim);    padding-left: 16px; }
   .msg-system      { color: var(--dim);    font-style: italic; }
@@ -148,6 +149,7 @@
 </div>
 
 <script src="rooms.js"></script>
+<script src="items.js"></script>
 
 <script>
 // =============================================================================
@@ -384,8 +386,100 @@ function onTick() {
 }
 
 // =============================================================================
-// ENGINE
+// ITEM STATE
+// itemLocations maps item id -> room id (or "inventory")
+// Initialised from ITEMS at game start.
 // =============================================================================
+let itemLocations = {};
+let playerInventory = []; // ordered list of item ids in player's possession
+
+function initItems() {
+  for (const [id, item] of Object.entries(ITEMS)) {
+    itemLocations[id] = item.room;
+  }
+}
+
+function itemsInRoom(roomId) {
+  return Object.keys(itemLocations).filter(id => itemLocations[id] === roomId);
+}
+
+function itemsInInventory() {
+  return Object.keys(itemLocations).filter(id => itemLocations[id] === "inventory");
+}
+
+// Find item by partial name match — checks inventory first, then current room
+function findItem(query, scope) {
+  // scope: "room", "inventory", "either"
+  const q = query.toLowerCase().trim();
+  const candidates = Object.entries(ITEMS).filter(([id]) => {
+    if (scope === "room")      return itemLocations[id] === currentRoom;
+    if (scope === "inventory") return itemLocations[id] === "inventory";
+    return itemLocations[id] === currentRoom || itemLocations[id] === "inventory";
+  });
+  // exact match first
+  let found = candidates.find(([, item]) => item.name.toLowerCase() === q);
+  if (!found) found = candidates.find(([, item]) => item.name.toLowerCase().includes(q));
+  if (!found) found = candidates.find(([id]) => id.toLowerCase().includes(q));
+  return found || null; // [id, item] or null
+}
+
+function printRoomItems(roomId) {
+  const ids = itemsInRoom(roomId);
+  for (const id of ids) {
+    print("  " + ITEMS[id].roomDesc, "msg-item");
+  }
+}
+
+function cmdTake(query) {
+  if (!query) { print("Take what?", "msg-error"); return; }
+  const found = findItem(query, "room");
+  if (!found) { print("You don't see that here.", "msg-error"); return; }
+  const [id, item] = found;
+  if (item.fixed) {
+    print(item.fixedMsg || "You can't take that.", "msg-error");
+    return;
+  }
+  itemLocations[id] = "inventory";
+  print("You take " + item.name + ".", "msg-system");
+}
+
+function cmdDrop(query) {
+  if (!query) { print("Drop what?", "msg-error"); return; }
+  const found = findItem(query, "inventory");
+  if (!found) { print("You're not carrying that.", "msg-error"); return; }
+  const [id, item] = found;
+  itemLocations[id] = currentRoom;
+  print("You drop " + item.name + ".", "msg-system");
+}
+
+function cmdInventory() {
+  const carrying = itemsInInventory();
+  separator();
+  print("INVENTORY", "msg-room-title");
+  if (carrying.length === 0) {
+    print("  You are carrying nothing.", "msg-exit-detail");
+  } else {
+    for (const id of carrying) {
+      print("  " + ITEMS[id].name, "msg-exit-detail");
+    }
+  }
+}
+
+function cmdExamine(query) {
+  if (!query) { print("Examine what?", "msg-error"); return; }
+  const found = findItem(query, "either");
+  if (!found) {
+    // also check fixed items in room even if not in candidates
+    const roomFound = findItem(query, "room");
+    if (!roomFound) { print("You don't see that here.", "msg-error"); return; }
+  }
+  const [, item] = found || findItem(query, "room");
+  separator();
+  print(item.name.charAt(0).toUpperCase() + item.name.slice(1), "msg-room-title");
+  print(item.examineDesc, "msg-room-desc");
+}
+
+
 
 const DIR_ALIASES = {
   "n": "n", "north": "n",
@@ -429,6 +523,7 @@ function showRoom(room) {
   if (!room.indoor) {
     print(weatherFlavour(), "msg-weather");
   }
+  printRoomItems(currentRoom);
   showExitsDetail(room);
 }
 
@@ -495,7 +590,18 @@ function handleCommand(raw) {
   print("> " + raw, "msg-echo");
 
   if (DIR_ALIASES[cmd] !== undefined) { move(DIR_ALIASES[cmd]); return; }
-  if (cmd === "look" || cmd === "l")  { showRoom(ROOMS[currentRoom]); return; }
+
+  // look / look [direction]
+  if (cmd === "look" || cmd === "l") { showRoom(ROOMS[currentRoom]); return; }
+  if (cmd.startsWith("look ") || cmd.startsWith("l ")) {
+    const dirRaw = cmd.startsWith("look ") ? cmd.slice(5).trim() : cmd.slice(2).trim();
+    const dir = DIR_ALIASES[dirRaw];
+    if (!dir) { print("That's not a direction.", "msg-error"); return; }
+    const room = ROOMS[currentRoom];
+    if (!room.exits[dir]) { print("There is nothing that way.", "msg-error"); return; }
+    print(room.exits[dir].desc, "msg-room-desc");
+    return;
+  }
 
   if (cmd === "map" || cmd.startsWith("map ")) {
     const arg = cmd.startsWith("map ") ? cmd.slice(4).trim() : null;
@@ -514,20 +620,49 @@ function handleCommand(raw) {
     return;
   }
 
+  // inventory
+  if (cmd === "inventory" || cmd === "i") { cmdInventory(); return; }
+
+  // take
+  if (cmd.startsWith("take ") || cmd.startsWith("get ") || cmd.startsWith("pick up ")) {
+    const q = cmd.startsWith("pick up ") ? cmd.slice(8) : cmd.startsWith("take ") ? cmd.slice(5) : cmd.slice(4);
+    cmdTake(q.trim());
+    return;
+  }
+
+  // drop
+  if (cmd.startsWith("drop ") || cmd.startsWith("put down ")) {
+    const q = cmd.startsWith("put down ") ? cmd.slice(9) : cmd.slice(5);
+    cmdDrop(q.trim());
+    return;
+  }
+
+  // examine
+  if (cmd.startsWith("examine ") || cmd.startsWith("x ") || cmd.startsWith("look at ")) {
+    const q = cmd.startsWith("examine ") ? cmd.slice(8) : cmd.startsWith("x ") ? cmd.slice(2) : cmd.slice(8);
+    cmdExamine(q.trim());
+    return;
+  }
+
   if (cmd === "help" || cmd === "?" || cmd === "commands") {
     separator();
     print("COMMANDS", "msg-room-title");
-    print("  north / n     move north",             "msg-exit-detail");
-    print("  south / s     move south",             "msg-exit-detail");
-    print("  east  / e     move east",              "msg-exit-detail");
-    print("  west  / w     move west",              "msg-exit-detail");
-    print("  up    / u     move up",                "msg-exit-detail");
-    print("  down  / d     move down",              "msg-exit-detail");
-    print("  look  / l     look around",            "msg-exit-detail");
-    print("  exits         list exits",             "msg-exit-detail");
-    print("  time          time and weather",       "msg-exit-detail");
-    print("  map              list districts",      "msg-exit-detail");
-    print("  map [district]   rooms in district",   "msg-exit-detail");
+    print("  north / n          move north",               "msg-exit-detail");
+    print("  south / s          move south",               "msg-exit-detail");
+    print("  east  / e          move east",                "msg-exit-detail");
+    print("  west  / w          move west",                "msg-exit-detail");
+    print("  up    / u          move up",                  "msg-exit-detail");
+    print("  down  / d          move down",                "msg-exit-detail");
+    print("  look / l           look around",              "msg-exit-detail");
+    print("  look [direction]   look in a direction",      "msg-exit-detail");
+    print("  exits              list exits",               "msg-exit-detail");
+    print("  time               time and weather",         "msg-exit-detail");
+    print("  inventory / i      show carried items",       "msg-exit-detail");
+    print("  take [item]        pick up an item",          "msg-exit-detail");
+    print("  drop [item]        drop an item",             "msg-exit-detail");
+    print("  examine [item]     examine an item",          "msg-exit-detail");
+    print("  map                list districts",           "msg-exit-detail");
+    print("  map [district]     rooms in district",        "msg-exit-detail");
     return;
   }
 
@@ -538,6 +673,7 @@ function init() {
   const weatherTable = Object.entries(WEATHER_STATES).map(([k, v]) => [k, v.weight]);
   currentWeather = weightedRandom(weatherTable);
   currentRoom    = randomFrom(SPAWN_ROOMS);
+  initItems();
   locDisp.textContent = ROOMS[currentRoom].name;
   updateTopbar();
 
