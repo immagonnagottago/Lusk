@@ -144,101 +144,24 @@ const SPAWN_ROOMS = [
 ];
 
 // =============================================================================
-// DISTRICTS — defines the map layout and display names
+// DISTRICTS — display names and order for the MAP command
+// The engine reads room lists directly from ROOMS, so just keep labels here
 // =============================================================================
 const DISTRICTS = {
-  government: {
-    label: "Government District",
-    mapLines: [
-      "         .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "         |   GOVERNMENT DISTRICT       |",
-      "         |   Treasury  · Civic Plaza   |",
-      "         |   Records Tower · Courts    |",
-      "         '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  rooftops: {
-    label: "The Rooftops",
-    mapLines: [
-      "    .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "    |   THE ROOFTOPS                     |",
-      "    |   Guildhall Bridge · Seven Arches  |",
-      "    |   Old Quarter Rooftops             |",
-      "    |   Washing Terrace · Gatehouse Top  |",
-      "    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  middle_city: {
-    label: "Middle City",
-    mapLines: [
-      "      .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "      |   MIDDLE CITY                  |",
-      "      |   Guildhall Approach           |",
-      "      |   Mercantile Baths             |",
-      "      |   The Long Stair               |",
-      "      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  markets: {
-    label: "The Markets",
-    mapLines: [
-      "    .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "    |   THE MARKETS                      |",
-      "    |   Silk Market · Upper Gallery      |",
-      "    |   Spice Alley · Provisions Yard    |",
-      "    |   Money Changers' Row              |",
-      "    |   Merchant's Bridge (above Plaza)  |",
-      "    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  temples: {
-    label: "Temple District",
-    mapLines: [
-      "      .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "      |   TEMPLE DISTRICT              |",
-      "      |   Temple Row · Red Temple      |",
-      "      |   The Unnamed Temple           |",
-      "      |   Scholars' Alley · Archive    |",
-      "      |   Wayfarer's Garden            |",
-      "      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  old_quarter: {
-    label: "The Old Quarter",
-    mapLines: [
-      "    .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "    |   THE OLD QUARTER                  |",
-      "    |   Sun Plaza · Old Wall Gate        |",
-      "    |   Copper Lane · The Narrow         |",
-      "    |   Tanners' Street · Canal Steps    |",
-      "    |   The Broken Wheel                 |",
-      "    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  harbour: {
-    label: "The Harbour",
-    mapLines: [
-      "      .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "      |   THE HARBOUR                  |",
-      "      |   Promenade · East & West Quay |",
-      "      |   Harbourmaster's Office       |",
-      "      |   Bronze Anchor · Lower Docks  |",
-      "      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  },
-  sewers: {
-    label: "The Sewers & Underworks",
-    mapLines: [
-      "  .~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.",
-      "  |   THE SEWERS & UNDERWORKS              |",
-      "  |   Sewer Entrance · Junction            |",
-      "  |   East Branch · West Branch            |",
-      "  |   North Channel · Old Cistern          |",
-      "  |   Cistern Far Side  [something sealed] |",
-      "  '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'",
-    ]
-  }
+  government:  { label: "Government District"     },
+  rooftops:    { label: "The Rooftops"            },
+  middle_city: { label: "Middle City"             },
+  markets:     { label: "The Markets"             },
+  temples:     { label: "Temple District"         },
+  old_quarter: { label: "The Old Quarter"         },
+  harbour:     { label: "The Harbour"             },
+  sewers:      { label: "The Sewers & Underworks" }
 };
+
+const DISTRICT_ORDER = [
+  "government", "rooftops", "middle_city",
+  "markets", "temples", "old_quarter", "harbour", "sewers"
+];
 
 // =============================================================================
 // ENGINE — you should not need to edit anything below this line
@@ -302,32 +225,44 @@ function showExitsDetail(room) {
   }
 }
 
-function showMap() {
+function showMap(districtKey) {
   const currentDistrict = ROOMS[currentRoom] ? ROOMS[currentRoom].district : null;
+
+  // MAP [district] — list rooms in that district
+  if (districtKey) {
+    // fuzzy match: allow "harbour", "old quarter", "old_quarter" etc.
+    const normalised = districtKey.replace(/\s+/g, "_").toLowerCase();
+    const matchedKey = DISTRICT_ORDER.find(k => k === normalised || DISTRICTS[k].label.toLowerCase().replace(/\s+/g, "_") === normalised);
+
+    if (!matchedKey) {
+      print("Unknown district. Type MAP to see all districts.", "msg-error");
+      return;
+    }
+
+    const d = DISTRICTS[matchedKey];
+    separator();
+    print(d.label.toUpperCase(), "msg-room-title");
+
+    const rooms = Object.entries(ROOMS).filter(([, r]) => r.district === matchedKey);
+    if (rooms.length === 0) {
+      print("  No rooms found in this district.", "msg-exit-detail");
+      return;
+    }
+    for (const [id, r] of rooms) {
+      const isHere = id === currentRoom;
+      print("  " + (isHere ? "* " : "  ") + r.name, isHere ? "msg-exits" : "msg-exit-detail");
+    }
+    return;
+  }
+
+  // MAP — list all districts
   separator();
-  print("LUSK — DISTRICT MAP", "msg-room-title");
-  print("[ * ] marks your current district", "msg-system");
-
-  const districtOrder = [
-    "government", "rooftops", "middle_city",
-    "markets", "temples", "old_quarter", "harbour", "sewers"
-  ];
-
-  for (const key of districtOrder) {
+  print("LUSK — DISTRICTS", "msg-room-title");
+  print("Type MAP [district name] to see rooms within it.", "msg-system");
+  for (const key of DISTRICT_ORDER) {
     const d = DISTRICTS[key];
-    if (!d) continue;
     const isHere = key === currentDistrict;
-    for (let i = 0; i < d.mapLines.length; i++) {
-      let line = d.mapLines[i];
-      // inject [*YOU*] marker into the middle line of the current district
-      if (isHere && i === Math.floor(d.mapLines.length / 2)) {
-        line = line.replace(/\|   /, "|[*] ");
-      }
-      print(line, isHere ? "msg-exits" : "msg-exit-detail");
-    }
-    if (key !== "sewers") {
-      print("               |", "msg-exit-detail");
-    }
+    print("  " + (isHere ? "* " : "  ") + d.label, isHere ? "msg-exits" : "msg-exit-detail");
   }
 }
 
@@ -350,7 +285,11 @@ function handleCommand(raw) {
 
   if (cmd === "look" || cmd === "l") { showRoom(ROOMS[currentRoom]); return; }
 
-  if (cmd === "map") { showMap(); return; }
+  if (cmd === "map" || cmd.startsWith("map ")) {
+    const arg = cmd.startsWith("map ") ? cmd.slice(4).trim() : null;
+    showMap(arg);
+    return;
+  }
 
   if (cmd === "exits" || cmd === "exit") { showExitsDetail(ROOMS[currentRoom]); return; }
 
@@ -365,7 +304,8 @@ function handleCommand(raw) {
     print("  down  / d     move down",      "msg-exit-detail");
     print("  look  / l     look around",    "msg-exit-detail");
     print("  exits         detailed exits", "msg-exit-detail");
-    print("  map           district map",   "msg-exit-detail");
+    print("  map              list districts",         "msg-exit-detail");
+    print("  map [district]   list rooms in district", "msg-exit-detail");
     return;
   }
 
