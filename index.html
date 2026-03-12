@@ -59,6 +59,23 @@
     text-transform: uppercase;
   }
 
+  #topbar .status-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  #topbar .time-display {
+    color: var(--dim);
+    font-size: 12px;
+  }
+
+  #topbar .weather-display {
+    color: var(--dim);
+    font-size: 12px;
+    font-style: italic;
+  }
+
   #topbar .location-display {
     color: var(--cyan);
     font-size: 12px;
@@ -78,6 +95,7 @@
   .msg { margin-bottom: 4px; }
   .msg-room-title  { color: var(--gold);   font-weight: 700; margin-top: 10px; margin-bottom: 2px; }
   .msg-room-desc   { color: var(--room);   margin-bottom: 4px; }
+  .msg-weather     { color: var(--dim);    font-style: italic; margin-bottom: 4px; }
   .msg-exits       { color: var(--green);  margin-bottom: 2px; }
   .msg-exit-detail { color: var(--dim);    padding-left: 16px; }
   .msg-system      { color: var(--dim);    font-style: italic; }
@@ -116,7 +134,11 @@
 <div id="wrapper">
   <div id="topbar">
     <span class="title">&#9670; Lusk</span>
-    <span class="location-display" id="location-display"></span>
+    <div class="status-right">
+      <span class="time-display" id="time-display"></span>
+      <span class="weather-display" id="weather-display"></span>
+      <span class="location-display" id="location-display"></span>
+    </div>
   </div>
   <div id="output"></div>
   <div id="inputbar">
@@ -125,12 +147,11 @@
   </div>
 </div>
 
-<!-- Load world data from separate file -->
 <script src="rooms.js"></script>
 
 <script>
 // =============================================================================
-// SPAWN ROOMS — add or remove room IDs here to change where players can start
+// SPAWN ROOMS
 // =============================================================================
 const SPAWN_ROOMS = [
   "the_bronze_anchor",
@@ -146,8 +167,7 @@ const SPAWN_ROOMS = [
 ];
 
 // =============================================================================
-// DISTRICTS — display names and order for the MAP command
-// The engine reads room lists directly from ROOMS, so just keep labels here
+// DISTRICTS
 // =============================================================================
 const DISTRICTS = {
   heights:     { label: "The Heights"             },
@@ -167,7 +187,204 @@ const DISTRICT_ORDER = [
 ];
 
 // =============================================================================
-// ENGINE — you should not need to edit anything below this line
+// TIME & WEATHER
+// 1 tick = 30 seconds real time = 1 in-game hour
+// Full day = 24 ticks = 12 real minutes
+// =============================================================================
+
+const TICK_MS = 30000;
+
+const TIME_PERIODS = [
+  { name: "deep night",  hours: [0, 1, 2, 3] },
+  { name: "before dawn", hours: [4, 5] },
+  { name: "dawn",        hours: [6] },
+  { name: "morning",     hours: [7, 8, 9] },
+  { name: "midday",      hours: [10, 11, 12] },
+  { name: "afternoon",   hours: [13, 14, 15, 16] },
+  { name: "dusk",        hours: [17, 18] },
+  { name: "evening",     hours: [19, 20, 21] },
+  { name: "night",       hours: [22, 23] }
+];
+
+const WEATHER_STATES = {
+  clear: {
+    label: "clear",
+    weight: 35,
+    flavour: {
+      "deep night":   "The sky is clear and black, stars thick from horizon to horizon. The sea reflects them faintly.",
+      "before dawn":  "The sky is still dark but the stars are thinning at the eastern edge.",
+      "dawn":         "Clear dawn. The harbour turns gold from the east, the water bright.",
+      "morning":      "A clear morning. The light is sharp and the sea is a hard blue.",
+      "midday":       "Clear and bright. Shadows are short. The white stones of the Heights are almost painful to look at.",
+      "afternoon":    "Clear afternoon, the light turning amber. The sea glitters to the south.",
+      "dusk":         "A clear dusk. The western sky over the headland goes orange, then red, then a deep violet.",
+      "evening":      "Clear evening, the first stars appearing over the harbour mouth.",
+      "night":        "Clear night. The stars are out. A half-moon lays a broken path across the water."
+    }
+  },
+  overcast: {
+    label: "overcast",
+    weight: 25,
+    flavour: {
+      "deep night":   "Thick clouds. No stars, no moon. The darkness is complete except for the harbour lanterns.",
+      "before dawn":  "The sky is a uniform grey, lightening only slightly toward the east.",
+      "dawn":         "An overcast dawn. The light arrives without drama, grey and even.",
+      "morning":      "Overcast. The light is flat and directionless. The sea is the colour of pewter.",
+      "midday":       "Heavy cloud cover. The city feels slightly muffled, colours duller than usual.",
+      "afternoon":    "Still overcast. A faint smell of rain that hasn't arrived yet.",
+      "dusk":         "The clouds swallow the sunset. Dusk arrives as a general dimming.",
+      "evening":      "A grey evening. The lamps are lit earlier than usual.",
+      "night":        "Overcast. The lanterns cast small circles of warm light in the general dark."
+    }
+  },
+  light_rain: {
+    label: "light rain",
+    weight: 20,
+    flavour: {
+      "deep night":   "Light rain falls steadily in the darkness. The harbour stones shine wet.",
+      "before dawn":  "Rain before dawn. The gutters run quietly. The city smells of wet stone.",
+      "dawn":         "Raining at dawn. The light is grey and diffuse, the harbour blurred.",
+      "morning":      "Light rain. People move with purpose, hoods up. The market awnings drip.",
+      "midday":       "A steady light rain. The square empties slightly. The smell of wet canvas.",
+      "afternoon":    "Rain continues through the afternoon. Soft and persistent.",
+      "dusk":         "Still raining at dusk. The lights of the city are haloed in the wet air.",
+      "evening":      "Light rain in the evening. The cobblestones shine. The taverns are full.",
+      "night":        "Soft rain in the night. The sound of it on the water is constant and quiet."
+    }
+  },
+  heavy_rain: {
+    label: "heavy rain",
+    weight: 10,
+    flavour: {
+      "deep night":   "Heavy rain hammers the rooftops. The gutters overflow. The harbour is loud with it.",
+      "before dawn":  "Hard rain before dawn. The streets run like rivers. Thunder somewhere out to sea.",
+      "dawn":         "Dawn under heavy rain. Everything is noise and grey movement.",
+      "morning":      "Heavy rain this morning. Most of the market stalls are shuttered or covered. The streets are half empty.",
+      "midday":       "The rain is heavy and shows no sign of stopping. Midday feels like late afternoon.",
+      "afternoon":    "Sustained heavy rain. The canals are running high. Water drips through old roofs.",
+      "dusk":         "Heavy rain at dusk. Visibility is poor. The harbour lights are smears in the wet.",
+      "evening":      "A rough evening. The rain is hard and the wind has come up. The taverns are packed.",
+      "night":        "A stormy night. The rain is loud on every surface. The harbour is rough."
+    }
+  },
+  fog: {
+    label: "fog",
+    weight: 8,
+    flavour: {
+      "deep night":   "Thick fog. The harbour lanterns are invisible from two streets away. The foghorn sounds.",
+      "before dawn":  "Dense fog before dawn. The city is reduced to sounds and shapes.",
+      "dawn":         "Fog at dawn. The light arrives as a general brightening with no clear source.",
+      "morning":      "Morning fog lies heavy over the harbour. The ships are shapes in grey. The foghorn sounds at intervals.",
+      "midday":       "The fog hasn't lifted. Sound carries strangely. You can hear conversations you can't see.",
+      "afternoon":    "Still foggy. The afternoon light is dim and directionless.",
+      "dusk":         "Fog and dusk together. The city disappears in layers.",
+      "evening":      "A foggy evening. The lamp-lighters are busy. The streets are quieter than usual.",
+      "night":        "Dense night fog. The harbour is completely invisible. The foghorn is a constant presence."
+    }
+  },
+  storm: {
+    label: "storm",
+    weight: 2,
+    flavour: {
+      "deep night":   "A full storm. Lightning over the open water. The harbour chains strain. The city hunkers down.",
+      "before dawn":  "The storm is at its worst before dawn. The wind is loud in every chimney.",
+      "dawn":         "Storm at dawn. No sunrise — just a gradual lightening of the violent sky.",
+      "morning":      "A storm this morning. Most people are indoors. The harbour is closed to departures.",
+      "midday":       "The storm shows no sign of breaking. Midday is dark as evening.",
+      "afternoon":    "Storm through the afternoon. Slates off roofs. The canals are dangerously high.",
+      "dusk":         "Storm at dusk. The sky is extraordinary — black and green and white.",
+      "evening":      "The storm rages into the evening. The Bronze Anchor is standing room only.",
+      "night":        "A full night storm. Lightning counts the seconds. The sea is loud from everywhere in the city."
+    }
+  }
+};
+
+const WEATHER_TRANSITIONS = {
+  clear:       [["clear", 50], ["overcast", 35], ["light_rain", 10], ["fog", 5]],
+  overcast:    [["overcast", 30], ["light_rain", 30], ["clear", 20], ["heavy_rain", 15], ["fog", 5]],
+  light_rain:  [["light_rain", 35], ["overcast", 30], ["heavy_rain", 20], ["clear", 15]],
+  heavy_rain:  [["heavy_rain", 40], ["light_rain", 35], ["storm", 15], ["overcast", 10]],
+  fog:         [["fog", 40], ["overcast", 35], ["clear", 20], ["light_rain", 5]],
+  storm:       [["storm", 30], ["heavy_rain", 50], ["overcast", 20]]
+};
+
+const WEATHER_CHECK_INTERVAL = 4; // check for weather change every 4 game-hours
+
+let gameHour       = Math.floor(Math.random() * 24);
+let currentWeather = "clear";
+let tickCount      = 0;
+let currentRoom    = null;
+
+function getTimePeriod(hour) {
+  for (const p of TIME_PERIODS) {
+    if (p.hours.includes(hour)) return p.name;
+  }
+  return "night";
+}
+
+function formatHour(hour) {
+  const h = hour % 12 || 12;
+  const ampm = hour < 12 ? "am" : "pm";
+  return h + ampm;
+}
+
+function weatherFlavour() {
+  const period = getTimePeriod(gameHour);
+  const w = WEATHER_STATES[currentWeather];
+  return w.flavour[period] || w.flavour["night"];
+}
+
+function updateTopbar() {
+  document.getElementById("time-display").textContent =
+    formatHour(gameHour) + "  ·  " + getTimePeriod(gameHour);
+  document.getElementById("weather-display").textContent =
+    WEATHER_STATES[currentWeather].label;
+}
+
+function weightedRandom(table) {
+  const total = table.reduce((s, [, w]) => s + w, 0);
+  let r = Math.random() * total;
+  for (const [key, w] of table) {
+    r -= w;
+    if (r <= 0) return key;
+  }
+  return table[table.length - 1][0];
+}
+
+function advanceWeather() {
+  const next = weightedRandom(WEATHER_TRANSITIONS[currentWeather]);
+  if (next !== currentWeather) {
+    currentWeather = next;
+    return true;
+  }
+  return false;
+}
+
+function onTick() {
+  const prevPeriod  = getTimePeriod(gameHour);
+  gameHour  = (gameHour + 1) % 24;
+  tickCount++;
+
+  const newPeriod    = getTimePeriod(gameHour);
+  let weatherChanged = false;
+
+  if (tickCount % WEATHER_CHECK_INTERVAL === 0) {
+    weatherChanged = advanceWeather();
+  }
+
+  updateTopbar();
+
+  if (newPeriod !== prevPeriod) {
+    const cap = newPeriod.charAt(0).toUpperCase() + newPeriod.slice(1);
+    print("  " + cap + ".", "msg-system");
+  }
+  if (weatherChanged) {
+    print("  " + weatherFlavour(), "msg-weather");
+  }
+}
+
+// =============================================================================
+// ENGINE
 // =============================================================================
 
 const DIR_ALIASES = {
@@ -185,7 +402,6 @@ const DIR_LABELS = {
   "u": "Up",    "d": "Down"
 };
 
-let currentRoom = null;
 const output  = document.getElementById("output");
 const input   = document.getElementById("cmdinput");
 const locDisp = document.getElementById("location-display");
@@ -210,13 +426,10 @@ function showRoom(room) {
   separator();
   print(room.name, "msg-room-title");
   print(room.desc, "msg-room-desc");
+  if (!room.indoor) {
+    print(weatherFlavour(), "msg-weather");
+  }
   showExitsDetail(room);
-}
-
-function showExitsLine(room) {
-  const dirs = Object.keys(room.exits);
-  if (dirs.length === 0) { print("Exits: none", "msg-exits"); return; }
-  print("Exits: " + dirs.map(d => DIR_LABELS[d]).join("  "), "msg-exits");
 }
 
 function showExitsDetail(room) {
@@ -231,21 +444,19 @@ function showExitsDetail(room) {
 function showMap(districtKey) {
   const currentDistrict = ROOMS[currentRoom] ? ROOMS[currentRoom].district : null;
 
-  // MAP [district] — list rooms in that district
   if (districtKey) {
-    // fuzzy match: allow "harbour", "old quarter", "old_quarter" etc.
     const normalised = districtKey.replace(/\s+/g, "_").toLowerCase();
-    const matchedKey = DISTRICT_ORDER.find(k => k === normalised || DISTRICTS[k].label.toLowerCase().replace(/\s+/g, "_") === normalised);
-
+    const matchedKey = DISTRICT_ORDER.find(k =>
+      k === normalised ||
+      DISTRICTS[k].label.toLowerCase().replace(/\s+/g, "_") === normalised
+    );
     if (!matchedKey) {
       print("Unknown district. Type MAP to see all districts.", "msg-error");
       return;
     }
-
     const d = DISTRICTS[matchedKey];
     separator();
     print(d.label.toUpperCase(), "msg-room-title");
-
     const rooms = Object.entries(ROOMS).filter(([, r]) => r.district === matchedKey);
     if (rooms.length === 0) {
       print("  No rooms found in this district.", "msg-exit-detail");
@@ -258,7 +469,6 @@ function showMap(districtKey) {
     return;
   }
 
-  // MAP — list all districts
   separator();
   print("LUSK — DISTRICTS", "msg-room-title");
   print("Type MAP [district name] to see rooms within it.", "msg-system");
@@ -285,8 +495,7 @@ function handleCommand(raw) {
   print("> " + raw, "msg-echo");
 
   if (DIR_ALIASES[cmd] !== undefined) { move(DIR_ALIASES[cmd]); return; }
-
-  if (cmd === "look" || cmd === "l") { showRoom(ROOMS[currentRoom]); return; }
+  if (cmd === "look" || cmd === "l")  { showRoom(ROOMS[currentRoom]); return; }
 
   if (cmd === "map" || cmd.startsWith("map ")) {
     const arg = cmd.startsWith("map ") ? cmd.slice(4).trim() : null;
@@ -296,19 +505,29 @@ function handleCommand(raw) {
 
   if (cmd === "exits" || cmd === "exit") { showExitsDetail(ROOMS[currentRoom]); return; }
 
+  if (cmd === "time") {
+    separator();
+    print("TIME & WEATHER", "msg-room-title");
+    print("  " + formatHour(gameHour) + " — " + getTimePeriod(gameHour), "msg-exit-detail");
+    print("  " + WEATHER_STATES[currentWeather].label, "msg-exit-detail");
+    print("  " + weatherFlavour(), "msg-weather");
+    return;
+  }
+
   if (cmd === "help" || cmd === "?" || cmd === "commands") {
     separator();
     print("COMMANDS", "msg-room-title");
-    print("  north / n     move north",     "msg-exit-detail");
-    print("  south / s     move south",     "msg-exit-detail");
-    print("  east  / e     move east",      "msg-exit-detail");
-    print("  west  / w     move west",      "msg-exit-detail");
-    print("  up    / u     move up",        "msg-exit-detail");
-    print("  down  / d     move down",      "msg-exit-detail");
-    print("  look  / l     look around",    "msg-exit-detail");
-    print("  exits         detailed exits", "msg-exit-detail");
-    print("  map              list districts",         "msg-exit-detail");
-    print("  map [district]   list rooms in district", "msg-exit-detail");
+    print("  north / n     move north",             "msg-exit-detail");
+    print("  south / s     move south",             "msg-exit-detail");
+    print("  east  / e     move east",              "msg-exit-detail");
+    print("  west  / w     move west",              "msg-exit-detail");
+    print("  up    / u     move up",                "msg-exit-detail");
+    print("  down  / d     move down",              "msg-exit-detail");
+    print("  look  / l     look around",            "msg-exit-detail");
+    print("  exits         list exits",             "msg-exit-detail");
+    print("  time          time and weather",       "msg-exit-detail");
+    print("  map              list districts",      "msg-exit-detail");
+    print("  map [district]   rooms in district",   "msg-exit-detail");
     return;
   }
 
@@ -316,14 +535,20 @@ function handleCommand(raw) {
 }
 
 function init() {
-  currentRoom = randomFrom(SPAWN_ROOMS);
+  const weatherTable = Object.entries(WEATHER_STATES).map(([k, v]) => [k, v.weight]);
+  currentWeather = weightedRandom(weatherTable);
+  currentRoom    = randomFrom(SPAWN_ROOMS);
   locDisp.textContent = ROOMS[currentRoom].name;
+  updateTopbar();
+
   separator();
   print("LUSK", "msg-room-title");
   print("An island city. You are a stranger here.", "msg-room-desc");
   print("Type HELP for commands.", "msg-system");
   showRoom(ROOMS[currentRoom]);
   input.focus();
+
+  setInterval(onTick, TICK_MS);
 }
 
 input.addEventListener("keydown", function(e) {
