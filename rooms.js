@@ -1,4 +1,4 @@
-const ROOMS = {
+\const ROOMS = {
 
   // ============================================================
   // THE HARBOUR
@@ -445,7 +445,6 @@ const ROOMS = {
       e: { to: "temple_row_east", desc: "The row continues east toward its far end." },
       n: { to: "wayfarers_garden", desc: "The row opens north at the gate of the Wayfarer's Garden." },
       s: { to: "the_unnamed_temple", desc: "The plain door of the building with no sign." }
-      s: { to: "the_red_temple", desc: "The steps of the Red Temple rise to the up, thick with incense." }
     }
   },
 
@@ -588,7 +587,7 @@ const ROOMS = {
     name: "Cliff Overlook",
     desc: "The highest point of the western headland, a small flat space of bare rock at the island's edge. The drop to the sea is direct and considerable. On a clear day you can see the coastline of the mainland to the west, distant and grey. Closer, another island to the northwest, its own lights visible at night. The city of Lusk is spread out behind you — you can see the whole island from here, its buildings covering every available surface, the harbour curving at the south end, the Heights rising at the north. Someone has left a small cairn of stones at the edge. You don't disturb it.",
     exits: {
-      s: { to: "the_cliff_path", desc: "The path descends back toward the city." }
+      s: { to: "cliff_path", desc: "The path descends back toward the city." }
     }
   },
 
