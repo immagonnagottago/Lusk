@@ -134,13 +134,15 @@
 // =============================================================================
 const SPAWN_ROOMS = [
   "the_bronze_anchor",
-  "sun_plaza",
-  "old_canal_steps",
-  "the_wayfarers_garden",
-  "silk_market",
+  "carnaby_market_square",
+  "canal_steps",
+  "wayfarers_garden",
   "harbour_promenade",
   "copper_lane",
-  "temple_row"
+  "temple_row_main",
+  "embassy_row",
+  "old_pier",
+  "provisions_yard"
 ];
 
 // =============================================================================
@@ -148,19 +150,20 @@ const SPAWN_ROOMS = [
 // The engine reads room lists directly from ROOMS, so just keep labels here
 // =============================================================================
 const DISTRICTS = {
-  government:  { label: "Government District"     },
+  heights:     { label: "The Heights"             },
   rooftops:    { label: "The Rooftops"            },
-  middle_city: { label: "Middle City"             },
-  markets:     { label: "The Markets"             },
+  government:  { label: "Government District"     },
+  residency:   { label: "The Residency"           },
   temples:     { label: "Temple District"         },
+  carnaby:     { label: "Carnaby Market"          },
   old_quarter: { label: "The Old Quarter"         },
   harbour:     { label: "The Harbour"             },
   sewers:      { label: "The Sewers & Underworks" }
 };
 
 const DISTRICT_ORDER = [
-  "government", "rooftops", "middle_city",
-  "markets", "temples", "old_quarter", "harbour", "sewers"
+  "heights", "rooftops", "government", "residency",
+  "temples", "carnaby", "old_quarter", "harbour", "sewers"
 ];
 
 // =============================================================================
