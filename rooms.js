@@ -1,4 +1,4 @@
-\const ROOMS = {
+const ROOMS = {
 
   // ============================================================
   // THE HARBOUR
@@ -53,6 +53,7 @@
 
   "lighthouse_top": {
     district: "harbour",
+    indoor: true,
     name: "Lighthouse Top",
     desc: "The lamp room of the harbour lighthouse, smelling of whale oil and warm glass. The lamp mechanism — a large lens mounted on a brass pivot — occupies the centre of the circular room. The keeper has left a logbook open on a small desk: weather observations, ship sightings, the occasional note of something unusual seen at night. The view from the windows is extraordinary, the full arc of the bay visible below and the sea extending in every direction beyond.",
     exits: {
@@ -83,6 +84,7 @@
 
   "fish_market": {
     district: "harbour",
+    indoor: true,
     name: "Fish Market",
     desc: "A long covered shed running parallel to the West Quay, its floor perpetually wet and its smell something you eventually stop noticing. The stalls sell the morning's catch — some familiar, some not. One vendor has arranged a display of things dredged from deep water that he sells purely as curiosities, their edibility uncertain. The market is loud and fast, prices changing by the minute as the morning wears on and freshness becomes a negotiation.",
     exits: {
@@ -93,6 +95,7 @@
 
   "customs_house": {
     district: "harbour",
+    indoor: true,
     name: "Customs House",
     desc: "A large, efficient building facing the East Quay, its ground floor divided into inspection bays where cargo is weighed, examined, and taxed. The clerks here work with the particular calm of people who hold significant power and know it. The waiting area for merchants and captains has benches worn smooth by generations of anxious sitting. A noticeboard lists current tariff rates in six languages. The upper floor is administrative — visible through the windows, people moving between desks with ledgers.",
     exits: {
@@ -103,6 +106,8 @@
 
   "customs_house_upper": {
     district: "harbour",
+    indoor: true,
+    indoor: true,
     name: "Customs House — Upper Floor",
     desc: "The administrative heart of Lusk's import controls. Long tables covered in manifests, ledgers stacked to the ceiling in wooden racks, clerks moving between them with the efficiency of people who have done this for years. A senior official sits at a desk by the window overlooking the quay, reviewing documents. The walls are hung with maps of known trade routes, annotated in different hands over many years. A locked door at the back leads to the harbourmaster's private office.",
     exits: {
@@ -124,6 +129,7 @@
 
   "the_bronze_anchor": {
     district: "harbour",
+    indoor: true,
     name: "The Bronze Anchor Tavern",
     desc: "A low-beamed common room thick with pipe smoke and the smell of salted fish. Sailors crowd mismatched tables, arguing in half a dozen languages. A broad-shouldered woman behind the bar refills cups without being asked. The floorboards are stained dark from a century of spilled drink. A bronze anchor, small and clearly decorative, hangs above the bar — the establishment's namesake and its only ornament. Through a salt-crusted window, the shimmer of the harbour is visible.",
     exits: {
@@ -135,6 +141,7 @@
 
   "anchor_upstairs": {
     district: "harbour",
+    indoor: true,
     name: "The Bronze Anchor — Upper Rooms",
     desc: "A narrow corridor of numbered doors, each with a painted wooden plaque. The floorboards creak with every step. A window at the corridor's end looks out over the harbour — at this height you can see the curve of the bay and, on the horizon, the low shapes of other islands. Someone has left a candle burning on the sill. The sounds of the common room below come up through the boards, muffled and companionable.",
     exits: {
@@ -144,6 +151,7 @@
 
   "lower_docks_main": {
     district: "harbour",
+    indoor: true,
     name: "Lower Docks",
     desc: "The waterline itself — a sloshing, shadowed world beneath the promenade. Stone pillars holding up the city above are encrusted with barnacles and dark weed. Small boats are tied here, some clearly long unused. Light comes in low and broken off the water. It is quieter than expected. Somewhere in the dimness, something drips steadily. A rusted iron door is set into one of the larger pillars, its hinges green with age.",
     exits: {
@@ -156,6 +164,7 @@
 
   "lower_docks_east": {
     district: "harbour",
+    indoor: true,
     name: "Lower Docks — East",
     desc: "Beneath the East Quay, the light barely reaches. The sound of the merchant fleet overhead — creaking timbers, shouted orders, the thud of cargo — carries clearly through the stones above. Several small rowing boats are moored in the darkness, their registration marks rubbed off. A narrow passage leads into the stone wall, its entrance hung with a strip of old canvas.",
     exits: {
@@ -166,6 +175,7 @@
 
   "lower_docks_west": {
     district: "harbour",
+    indoor: true,
     name: "Lower Docks — West",
     desc: "Under the West Quay, the dock level drops lower — this section floods at high tide, and the watermark is clearly visible on the pillars. The wood is soft and black. Old fishing equipment is stored here: broken traps, rotting nets, a stack of cork floats. A smell of deep water and old fish. Something moves in the water near the far wall, unhurried and too large for a fish.",
     exits: {
@@ -230,6 +240,7 @@
 
   "canal_dock": {
     district: "old_quarter",
+    indoor: true,
     name: "Canal Dock",
     desc: "The foot of the Canal Steps, at waterline. A small dock of dark wet wood bobs gently. A flat-bottomed water taxi is tied here, its operator asleep under a wide hat. The undersides of the city bridges are visible from here — mossy stone arches, the occasional bundle of rope or rusted chain hanging into the water. The canal smells of mud and minerals rather than the sea, a different kind of old.",
     exits: {
@@ -240,6 +251,7 @@
 
   "the_narrow": {
     district: "old_quarter",
+    indoor: true,
     name: "The Narrow",
     desc: "A passage so tight between two ancient buildings that you must turn sideways. The walls above lean together until they nearly touch, four storeys up. Inexplicably popular as a shortcut. Someone has hung a string of coloured glass beads across the entrance at head height, replacing them whenever they break. The city noise falls away to almost nothing in the middle of it, replaced by a close, intimate quiet and the sound of your own footsteps.",
     exits: {
@@ -250,6 +262,7 @@
 
   "the_broken_wheel": {
     district: "old_quarter",
+    indoor: true,
     name: "The Broken Wheel",
     desc: "A drinking house that has operated under various names for at least two hundred years. The current name references a cartwheel that came through the front wall during some forgotten incident and was never fully removed — its iron rim is still visible in the plaster above the door. The clientele are old quarter regulars: workers, insomniacs, people who prefer to drink in the afternoon. A fire burns even in warm weather. No one bothers anyone else.",
     exits: {
@@ -284,6 +297,7 @@
 
   "order_of_gnomes": {
     district: "old_quarter",
+    indoor: true,
     name: "The Order of Gnomes — The Grotto",
     desc: "The door opens into a space that takes a moment to understand. The room is not large, but it opens inward in a way that feels larger than its walls allow — a grotto-like space of uneven stone, candlelit, cool. The ceiling is higher than expected. Alcoves line every wall, each one a shrine: a sea-god with offerings of salt and rope, a harvest deity with dried flowers, a hooded figure of uncertain origin with coins at its feet, a dozen others. The shrines are modest and worn smooth from use. Two people sit on plain wooden benches in silence. A priest in undyed linen moves quietly between the alcoves, tending the candles. The air smells of a dozen different incenses, none of them overwhelming.",
     exits: {
@@ -293,6 +307,7 @@
 
   "copper_lane_bridge": {
     district: "old_quarter",
+    indoor: true,
     name: "Copper Lane — Upper Bridge",
     desc: "A low stone bridge connecting two buildings at second-floor level. Looking down into Copper Lane, the street seems narrower and more labyrinthine from above. The bridge is wide enough for two people to pass sideways. Pot plants have been placed along the parapet — by whom no one can agree. To the east, a door stands slightly ajar into someone's cluttered upper room, the sound of a typewriter or loom audible within.",
     exits: {
@@ -356,6 +371,7 @@
 
   "silk_market": {
     district: "carnaby",
+    indoor: true,
     name: "The Silk Market",
     desc: "A covered market of considerable age, its vaulted roof of iron and old glass letting in columns of dusty light. The stalls sell cloth, dye, thread, and finished garments from every corner of the known world. The noise is constant: haggling in multiple languages, the snap of fabric being shaken out, the clatter of a dropped bolt. The colours are extraordinary — violent orange, deep indigo, a red so bright it hurts. Somewhere nearby, a musician plays a stringed instrument no one has bothered to name.",
     exits: {
@@ -368,6 +384,7 @@
 
   "silk_market_gallery": {
     district: "carnaby",
+    indoor: true,
     name: "Silk Market — Upper Gallery",
     desc: "The upper level of the Silk Market, quieter and considerably more expensive. The traders here operate from proper enclosed shops and are not in any hurry. The goods are extraordinary: cloth so fine it appears to dissolve at its edges, dyes that shift colour in different lights, embroidery that must have taken years. One dealer works behind a locked glass case, by appointment only. The noise of the market floor rises up, softened by distance.",
     exits: {
@@ -378,6 +395,7 @@
 
   "market_gallery_bridge": {
     district: "carnaby",
+    indoor: true,
     name: "Market Gallery Bridge",
     desc: "A covered bridge running above the eastern side of Carnaby Square, connecting the Silk Market's upper gallery to a row of upper-floor merchants. The bridge sways very slightly when walked. The drop to the square stones below is considerable, and the view down into the crowd is vertiginous and fascinating — the market reduced to a pattern of awnings and moving heads. A spice merchant has colonised the midpoint with hanging dried goods.",
     exits: {
@@ -410,6 +428,8 @@
 
   "market_cellars": {
     district: "carnaby",
+    indoor: true,
+    indoor: true,
     name: "Market Cellars",
     desc: "A network of vaulted stone cellars beneath the market district, used for cold storage of perishable goods. The temperature drops noticeably. Shelves and racks of goods line the walls — cured meats, sealed crocks of preserved vegetables, wine in unlabelled bottles. The cellars extend further than the market above them, running under several neighbouring streets. Workers move quietly here, their voices low by instinct. A passage at the far end connects to an older section that predates the market by some centuries.",
     exits: {
@@ -450,6 +470,7 @@
 
   "the_unnamed_temple": {
     district: "temples",
+    indoor: true,
     name: "The Unnamed Temple — Anteroom",
     desc: "The inside of the building with no sign. The anteroom is plain white plaster, lit by a single oil lamp. A dozen wooden chairs face a curtained doorway. The queue from outside has become a seated wait in here. No one speaks. No one looks at anyone else. A small table holds cups of water and nothing else. Whatever is behind the curtain, the people waiting for it are very calm.",
     exits: {
@@ -494,6 +515,7 @@
 
   "archive_reading_room": {
     district: "temples",
+    indoor: true,
     name: "Archive Reading Room",
     desc: "A long room with high windows and a smell of paper, wax, and slow time. Reading tables run its length, most of them occupied by scholars bent over documents, maps, or objects laid on cloth. The archive itself is through a locked door at the far end, accessible only with a reader's pass. The librarian — an elderly person of indeterminate age, wearing ink-stained grey — moves silently between the tables, replacing documents and occasionally correcting people's Latin in a whisper.",
     exits: {
@@ -506,7 +528,19 @@
     name: "The Red Temple — Steps",
     desc: "The steps of the most aggressively decorated temple on the row — its facade covered in carved figures engaged in acts of commerce, war, harvest, and celebration, all in vivid red-painted stone. The god here presides over abundance in general, and the priests reflect this: well-fed, richly robed, and extremely willing to discuss the faith with anyone who pauses. The incense from the censers is thick, sweet, and slightly dizzying. They are always looking for new members.",
     exits: {
-      s: { to: "temple_row_main", desc: "The steps descend to Temple Row." }
+      s: { to: "temple_row_main", desc: "The steps descend to Temple Row." },
+      n: { to: "the_red_temple_interior", desc: "The gilded doors stand open. Inside, light and warmth." }
+    }
+  },
+
+  "the_red_temple_interior": {
+    district: "temples",
+    indoor: true,
+    name: "The Red Temple — Interior",
+    indoor: true,
+    desc: "Inside, the temple is warm and aggressively beautiful. Every surface is painted, gilded, or hung with cloth in deep reds and burnished gold. The ceiling is high and coffered, each panel depicting a scene of abundance — harvest, trade, feast, celebration. Oil lamps burn in niches, making the gold flicker. A priest approaches almost immediately, welcoming, professionally warm, with the particular attentiveness of someone who has been trained to notice who looks uncertain. The smell of incense is stronger in here.",
+    exits: {
+      s: { to: "the_red_temple", desc: "The gilded doors lead back out to the temple steps." }
     }
   },
 
@@ -587,7 +621,7 @@
     name: "Cliff Overlook",
     desc: "The highest point of the western headland, a small flat space of bare rock at the island's edge. The drop to the sea is direct and considerable. On a clear day you can see the coastline of the mainland to the west, distant and grey. Closer, another island to the northwest, its own lights visible at night. The city of Lusk is spread out behind you — you can see the whole island from here, its buildings covering every available surface, the harbour curving at the south end, the Heights rising at the north. Someone has left a small cairn of stones at the edge. You don't disturb it.",
     exits: {
-      s: { to: "cliff_path", desc: "The path descends back toward the city." }
+      s: { to: "the_cliff_path", desc: "The path descends back toward the city." }
     }
   },
 
@@ -624,6 +658,7 @@
 
   "the_mercantile_baths": {
     district: "government",
+    indoor: true,
     name: "The Mercantile Baths",
     desc: "A large steam-filled bathhouse catering to merchants and guild employees, though anyone who can pay is welcome. The changing rooms are cedar-panelled, the pool heated by a furnace below. Business is conducted here as much as in any counting house — conversations in the steam are considered private by long tradition. A barber operates from a chair near the entrance. The baths have been in continuous operation for over a century and the steam has darkened the ceiling a deep amber.",
     exits: {
@@ -633,6 +668,7 @@
 
   "guildhall_upper_bridge": {
     district: "government",
+    indoor: true,
     name: "Guildhall Upper Bridge",
     desc: "A covered glassed-in walkway connecting two wings of the guildhall complex at the third storey. The floor is polished dark wood. Framed documents — charters, treaties, deeds — line the walls under glass. It is quiet here, cut off from the street noise below. A guild clerk hurries past without making eye contact. Through the windows on one side you can see the rooftops of the guildhall complex; on the other, the approach to the Heights.",
     exits: {
@@ -672,6 +708,7 @@
 
   "records_tower_base": {
     district: "heights",
+    indoor: true,
     name: "Records Tower — Base",
     desc: "The base of Lusk's central records tower, tall and narrow, leaning almost imperceptibly toward the harbour. The ground floor is a public office where clerks process requests for documents, titles, and historical records with professional slowness. The queue moves, but it does not hurry. The walls are lined with pigeonholes stuffed with scrolls. A circular staircase at the back climbs into the tower proper; access is restricted beyond the third floor.",
     exits: {
@@ -682,6 +719,7 @@
 
   "records_tower_top": {
     district: "heights",
+    indoor: true,
     name: "Records Tower — Upper Floor",
     desc: "Near the top of the records tower, a circular room with windows on all sides. The views from here are the finest in Lusk — the full circuit of the island visible, the sea bright in every direction. The city sprawls below: the tangled old quarter, the market's coloured awnings, the harbour full of ships, the green patch of the cliff headland to the west. The horizon shows four other islands, the nearest with what might be another city, its own lights visible on clear evenings.",
     exits: {
@@ -691,6 +729,7 @@
 
   "civic_plaza_terrace": {
     district: "heights",
+    indoor: true,
     name: "Civic Plaza — Upper Terrace",
     desc: "A wide stone terrace above the main plaza, used for official assemblies and public announcements. Today it is empty except for a sweeper moving methodically across the white stone. The view south from here is extraordinary — the whole city below, and the sea beyond it in both directions, the curve of the island visible at its edges. Behind you, heavy doors lead into the main government building, closed and flanked by two guards who are watching nothing in particular.",
     exits: {
@@ -700,6 +739,7 @@
 
   "court_of_arbiters": {
     district: "heights",
+    indoor: true,
     name: "Court of Arbiters",
     desc: "The court building's public waiting room — a long gallery with stone benches where disputes are queued like cargo. Petitioners sit with their documents and expressions of careful patience. Advocates in dark robes confer in low voices. A board lists today's cases in chalk, running to two columns. The sound of voices carries faintly from behind the heavy courtroom doors — someone is making an argument, at length, about something that appears to involve a warehouse and a promissory note.",
     exits: {
@@ -775,6 +815,7 @@
 
   "sewer_entrance": {
     district: "sewers",
+    indoor: true,
     name: "Sewer Entrance",
     desc: "You descend into Lusk's underside. The passage is ancient — older than most of the city above — built of fitted stone blocks that have never been named or recorded. The ceiling is low and dripping. The sewer runs as a narrow channel along one side of a walkway just wide enough for one person. The smell is powerful but not overwhelming. The sounds of the city above are muffled to near silence. In the darkness ahead, something small moves and then is still.",
     exits: {
@@ -786,6 +827,7 @@
 
   "sewer_junction": {
     district: "sewers",
+    indoor: true,
     name: "Sewer Junction",
     desc: "A wider chamber where several sewer channels meet. The ceiling is higher here — tall enough to stand straight. The space has clearly been used by people: crude marks on the wall (arrows, symbols, a scratched map someone began and abandoned), a wooden pallet in one corner with folded cloth on it. Someone lives here, or did. A grating in the ceiling lets in a thin column of grey light and the distant sounds of street life above.",
     exits: {
@@ -799,6 +841,7 @@
 
   "sewer_east_branch": {
     district: "sewers",
+    indoor: true,
     name: "Sewer — East Branch",
     desc: "A narrower passage running east beneath the harbour district. The walls are wet, and somewhere ahead water drips steadily. The stone is very old — blocks cut with tools no longer used. Small alcoves are set into the walls at irregular intervals, their purpose unclear. One of them contains a small ceramic jar sealed with wax, placed with deliberate care.",
     exits: {
@@ -810,6 +853,7 @@
 
   "sewer_west_branch": {
     district: "sewers",
+    indoor: true,
     name: "Sewer — West Branch",
     desc: "A recently cleared branch of the sewer — recently in the sense that the torch bracket on the wall is not entirely rusted, and someone has swept the worst of the debris aside. The passage runs west under the old quarter, its walls showing evidence of hasty excavation alongside the original stonework. Boot prints in the mud floor go in both directions.",
     exits: {
@@ -821,6 +865,7 @@
 
   "sewer_north": {
     district: "sewers",
+    indoor: true,
     name: "Sewer — North Channel",
     desc: "Deep under the government district now. The passage is old enough that the stone shows signs of an earlier structure beneath it — arched vaults of a different era visible where sections of the later sewer floor have cracked and subsided. The sound of running water is constant. The passage ahead is partly flooded — ankle deep — and the water moves with a slow deliberate current toward something further north.",
     exits: {
@@ -831,6 +876,7 @@
 
   "old_cistern": {
     district: "sewers",
+    indoor: true,
     name: "The Old Cistern",
     desc: "A vast underground chamber, its ceiling supported by rows of columns that vanish into the darkness above. The floor is a shallow lake — still, black, perfectly reflecting the faint light from a crack in the ceiling far above. It was built to hold the city's fresh water reserves in times of siege, and it is very old indeed. The columns are carved, though the carvings are submerged and invisible from here. The silence is total except for the occasional drip and a low resonant hum that seems to have no source.",
     exits: {
@@ -841,6 +887,7 @@
 
   "cistern_far_side": {
     district: "sewers",
+    indoor: true,
     name: "The Old Cistern — Far Side",
     desc: "The eastern edge of the cistern, reached by a ledge barely wide enough for careful walking. The water beside you is still and black. Set into the wall is a door of old iron, sea-green with age, sealed with a lock of a type you don't recognise. Above it, carved into the stone in a script that predates Lusk, are letters you cannot read. The hum is slightly louder here.",
     exits: {
